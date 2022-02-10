@@ -8,3 +8,4 @@
     4. 예제 도메인 모델 설정 및 확인
   + Ch02. Querydsl 기본 문법
     1. JPQL VS Querydsl
+    2. 기본 Q-Type 활용
