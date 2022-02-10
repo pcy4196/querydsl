@@ -9,3 +9,4 @@
   + Ch02. Querydsl 기본 문법
     1. JPQL VS Querydsl
     2. 기본 Q-Type 활용
+    3. 검색 조건 쿼리

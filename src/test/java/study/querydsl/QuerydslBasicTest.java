@@ -13,7 +13,7 @@ import study.querydsl.entity.Team;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static study.querydsl.entity.QMember.*;
+import static study.querydsl.entity.QMember.member;
 
 @SpringBootTest
 @Transactional
@@ -88,5 +88,42 @@ public class QuerydslBasicTest {
                 .fetchOne();
 
         assertThat(findMember1.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void search() {
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1")
+                        .and(member.age.between(10, 30)))
+                .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void searchAndParam() {
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(
+                        member.username.eq("member1"),
+                        member.age.eq(10)
+                )
+                .fetchOne();
+
+        /*
+        select
+            member0_.member_id as member_i1_1_,
+            member0_.age as age2_1_,
+            member0_.team_id as team_id4_1_,
+            member0_.username as username3_1_
+        from
+            member member0_
+        where
+            member0_.username=?
+            and member0_.age=?
+         */
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 }
