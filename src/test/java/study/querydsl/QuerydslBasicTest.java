@@ -1,5 +1,6 @@
 package study.querydsl;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,8 @@ import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static study.querydsl.entity.QMember.member;
@@ -125,5 +128,61 @@ public class QuerydslBasicTest {
          */
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetch() {
+//        List<Member> fetch = queryFactory
+//                .selectFrom(member)
+//                .fetch();
+//
+//        Member fetchOne = queryFactory
+//                .selectFrom(QMember.member)
+//                .fetchOne();
+//
+//        Member fetchFirst = queryFactory
+//                .selectFrom(QMember.member)
+//                .fetchFirst();
+
+        QueryResults<Member> result = queryFactory
+                .selectFrom(member)
+                .fetchResults();
+
+        result.getTotal();
+        /*
+        select
+            count(member0_.member_id) as col_0_0_
+        from
+            member member0_
+         */
+
+        List<Member> content = result.getResults();
+        /*
+        select
+            member0_.member_id as member_i1_1_,
+            member0_.age as age2_1_,
+            member0_.team_id as team_id4_1_,
+            member0_.username as username3_1_
+        from
+            member member0_
+         */
+
+        long total = queryFactory
+                .selectFrom(member)
+                .fetchCount();
+        /*
+        - Querydsl -
+        select
+        count(member1)
+        from
+        Member member1
+        */
+        /*
+        - SQL -
+        select
+        count(member0_.member_id) as col_0_0_
+        from
+        member member0_
+         */
     }
 }
