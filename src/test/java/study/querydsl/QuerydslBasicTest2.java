@@ -168,4 +168,126 @@ public class QuerydslBasicTest2 {
         assertThat(teamB.get(member.age.avg())).isEqualTo(35); // (30 + 40) / 2
     }
 
+    /**
+     * 팀 A에 소속된 모든 회원
+     */
+    @Test
+    public void join() {
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member)
+                .join(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        /*
+        select
+            member1
+        from
+            Member member1
+        inner join
+            member1.team as team
+        where
+            team.name = ?1
+        */
+        /*
+        select
+        member0_.member_id as member_i1_1_,
+                member0_.age as age2_1_,
+        member0_.team_id as team_id4_1_,
+                member0_.username as username3_1_
+        from
+        member member0_
+        inner join
+        team team1_
+        on member0_.team_id=team1_.team_id
+        where
+        team1_.name=?
+        */
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
+    }
+
+    @Test
+    public void join1() {
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        /*
+        select
+            member1
+        from
+            Member member1
+        left join
+            member1.team as team
+        where
+            team.name = ?1
+        */
+        /*
+        select
+        member0_.member_id as member_i1_1_,
+                member0_.age as age2_1_,
+        member0_.team_id as team_id4_1_,
+                member0_.username as username3_1_
+        from
+        member member0_
+        left outer join
+        team team1_
+        on member0_.team_id=team1_.team_id
+        where
+        team1_.name=?
+        */
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
+    }
+
+    /**
+     * 세타 조인
+     * 회원이 이름이 팀 이름과 같은 회원 조회
+     */
+    @Test
+    public void theta_join() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        /* select
+        member1
+    from
+        Member member1,
+        Team team
+    where
+        member1.username = team.name */
+        /*
+        select
+        member0_.member_id as member_i1_1_,
+                member0_.age as age2_1_,
+        member0_.team_id as team_id4_1_,
+                member0_.username as username3_1_
+        from
+        member member0_ cross
+                join
+        team team1_
+        where
+        member0_.username=team1_.name
+         */
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+
+    }
 }
