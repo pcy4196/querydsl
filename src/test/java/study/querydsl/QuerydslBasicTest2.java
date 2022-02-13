@@ -12,6 +12,8 @@ import study.querydsl.entity.Member;
 import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -438,5 +440,55 @@ public class QuerydslBasicTest2 {
 //                .extracting("username")
 //                .containsExactly("teamA", "teamB");
 
+    }
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    @Test
+    public void fetchJoinNo() {
+        em.flush();
+        em.clear(); // 영속성 컨텍스트 DB 반영
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치조인 미적용").isFalse();
+    }
+
+    @Test
+    public void fetchJoin() {
+        em.flush();
+        em.clear(); // 영속성 컨텍스트 DB 반영
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .join(member.team, team)
+                .fetchJoin() // 한번에 가져오는 조인방식
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        /*
+        select
+            member0_.member_id as member_i1_1_0_,
+            team1_.team_id as team_id1_2_1_,
+            member0_.age as age2_1_0_,
+            member0_.team_id as team_id4_1_0_,
+            member0_.username as username3_1_0_,
+            team1_.name as name2_2_1_
+        from
+            member member0_
+        inner join
+            team team1_
+                on member0_.team_id=team1_.team_id
+        where
+            member0_.username=?
+         */
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치조인 적용").isTrue();
     }
 }
