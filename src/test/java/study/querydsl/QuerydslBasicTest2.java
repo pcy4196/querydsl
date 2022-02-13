@@ -3,24 +3,20 @@ package study.querydsl;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.entity.Member;
-import study.querydsl.entity.QMember;
-import study.querydsl.entity.QTeam;
 import study.querydsl.entity.Team;
 
 import javax.persistence.EntityManager;
-
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static study.querydsl.entity.QMember.*;
-import static study.querydsl.entity.QTeam.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static study.querydsl.entity.QMember.member;
+import static study.querydsl.entity.QTeam.team;
 
 @SpringBootTest
 @Transactional
@@ -265,13 +261,15 @@ public class QuerydslBasicTest2 {
                 .where(member.username.eq(team.name))
                 .fetch();
 
-        /* select
-        member1
-    from
-        Member member1,
-        Team team
-    where
-        member1.username = team.name */
+        /*
+        select
+            member1
+        from
+            Member member1,
+            Team team
+        where
+            member1.username = team.name
+        */
         /*
         select
         member0_.member_id as member_i1_1_,
@@ -288,6 +286,157 @@ public class QuerydslBasicTest2 {
         assertThat(result)
                 .extracting("username")
                 .containsExactly("teamA", "teamB");
+
+    }
+
+    /**
+     * 예1) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인,회원은 모두 조회
+     * JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
+     * 예2~3) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인 (inner join)
+     * JPQL : select m, t from Member m join m.team t on t.name = 'teamA'
+     */
+    @Test
+    public void joinOnFiltering() {
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team)
+                .on(team.name.eq("teamA"))
+                .fetch();
+
+        /*
+        select member0_.member_id as member_i1_1_0_
+        , team1_.team_id as team_id1_2_1_
+        , member0_.age as age2_1_0_
+        , member0_.team_id as team_id4_1_0_
+        , member0_.username as username3_1_0_
+        , team1_.name as name2_2_1_
+        from member member0_
+        left outer join team team1_
+        on member0_.team_id=team1_.team_id
+            and (team1_.name=?)
+         */
+        for (Tuple tuple : result) {
+            System.out.println("tuple : " + tuple);
+        }
+
+        List<Tuple> result1 = queryFactory
+                .select(member, team)
+                .from(member)
+                .join(member.team, team)
+                .on(team.name.eq("teamA"))
+                .fetch();
+
+        /*
+        select
+            member0_.member_id as member_i1_1_0_,
+            team1_.team_id as team_id1_2_1_,
+            member0_.age as age2_1_0_,
+            member0_.team_id as team_id4_1_0_,
+            member0_.username as username3_1_0_,
+            team1_.name as name2_2_1_
+        from
+            member member0_
+        inner join
+            team team1_
+                on member0_.team_id=team1_.team_id
+                and (
+                    team1_.name=?
+                )
+         */
+        for (Tuple tuple : result1) {
+            System.out.println("tuple : " + tuple);
+        }
+
+        // result1 보다 더많이 사용하는 방법 - 결과는 같다
+        List<Tuple> result2 = queryFactory
+                .select(member, team)
+                .from(member)
+                .join(member.team, team)
+//                .on(team.name.eq("teamA"))
+                .where(team.name.eq("teamA"))
+                .fetch();
+        /*
+        select
+            member0_.member_id as member_i1_1_0_,
+            team1_.team_id as team_id1_2_1_,
+            member0_.age as age2_1_0_,
+            member0_.team_id as team_id4_1_0_,
+            member0_.username as username3_1_0_,
+            team1_.name as name2_2_1_
+        from
+            member member0_
+        inner join
+            team team1_
+                on member0_.team_id=team1_.team_id
+        where
+            team1_.name=?
+         */
+        for (Tuple tuple : result2) {
+            System.out.println("tuple : " + tuple);
+        }
+    }
+
+    /**
+     * 연관관계가 없는 엔티티 외부조인
+     * 회원이 이름이 팀 이름과 같은 대상 외부조인
+     */
+    @Test
+    public void joinOnNoRelation() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+//                .leftJoin(member.team, team)
+                .leftJoin(team)
+                .on(member.username.eq(team.name))
+                .fetch();
+
+        /*
+        select
+            member1,
+            team
+        from
+            Member member1
+        left join
+            Team team with member1.username = team.name
+        */
+        /*
+        select
+            member0_.member_id as member_i1_1_0_,
+            team1_.team_id as team_id1_2_1_,
+            member0_.age as age2_1_0_,
+            member0_.team_id as team_id4_1_0_,
+            member0_.username as username3_1_0_,
+            team1_.name as name2_2_1_
+        from
+            member member0_
+        left outer join
+            team team1_
+                on (
+                    member0_.username=team1_.name
+                )
+         */
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple : " + tuple);
+        }
+
+        /*
+        tuple : [Member(id=3, username=member1, age=10), null]
+        tuple : [Member(id=4, username=member2, age=20), null]
+        tuple : [Member(id=5, username=member3, age=30), null]
+        tuple : [Member(id=6, username=member4, age=40), null]
+        tuple : [Member(id=7, username=teamA, age=0), Team(id=1, name=teamA)]
+        tuple : [Member(id=8, username=teamB, age=0), Team(id=2, name=teamB)]
+        tuple : [Member(id=9, username=teamC, age=0), null]
+         */
+//        assertThat(result)
+//                .extracting("username")
+//                .containsExactly("teamA", "teamB");
 
     }
 }
