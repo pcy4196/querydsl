@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -270,5 +271,28 @@ public class QuerydslAdvancedTest {
         userDto = UserDto(name=member3, age=40)
         userDto = UserDto(name=member4, age=40)
          */
+    }
+
+    @Test
+    public void findDtoByQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+
+        /*
+        select
+            member0_.username as col_0_0_,
+            member0_.age as col_1_0_
+        from
+            member member0_
+         */
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + result);
+        }
+
+        // 단점 : 1. Q파일 생성 2. DTO가   Querydsl 의존성을 가진다.
     }
 }
