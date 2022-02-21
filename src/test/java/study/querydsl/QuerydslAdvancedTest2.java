@@ -2,6 +2,7 @@ package study.querydsl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,6 @@ public class QuerydslAdvancedTest2 {
                 .fetch();
     }
 
-
     @Test
     public void dynamicQueryWhereParam() {
         String usernameP = "member1";
@@ -111,11 +111,12 @@ public class QuerydslAdvancedTest2 {
     private List<Member> searchMember2(String usernameP, Integer ageP) {
         return queryFactory
                 .selectFrom(member)
-                .where(usernameEq(usernameP), ageEq(ageP))
+//                .where(usernameEq(usernameP), ageEq(ageP))
+                .where(allEq(usernameP, ageP))
                 .fetch();
     }
 
-    private Predicate usernameEq(String usernameP) {
+    private BooleanExpression usernameEq(String usernameP) {
         if (usernameP != null) {
             return member.username.eq(usernameP);
         } else {
@@ -123,7 +124,12 @@ public class QuerydslAdvancedTest2 {
         }
     }
 
-    private Predicate ageEq(Integer ageP) {
+    private BooleanExpression ageEq(Integer ageP) {
         return ageP != null ? member.age.eq(ageP) : null;
+    }
+
+    // null 체크는 주의해서 처리해야함
+    private BooleanExpression allEq(String usernameP, Integer ageP) {
+        return usernameEq(usernameP).and(ageEq(ageP));
     }
 }
