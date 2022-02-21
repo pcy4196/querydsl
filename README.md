@@ -24,3 +24,5 @@
     1. 프로젝션과 결과 반환 - BASIC
     2. 프로젝션과 결과 반환 - DTO Search
     3. 프로젝션과 결과 반환 - @QueryProjection
+    4. 동적쿼리 - BooleanBuilder
+    5. 동적쿼리 - Where 다중 파라미터
