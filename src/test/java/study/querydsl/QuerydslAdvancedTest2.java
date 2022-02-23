@@ -3,6 +3,7 @@ package study.querydsl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -186,6 +187,86 @@ public class QuerydslAdvancedTest2 {
                 .execute();
         /*
         delete from member where age>18;
+         */
+    }
+
+    @Test
+    public void sqlFunction() {
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate(
+                        "function('replace', {0}, {1}, {2})",
+                        member.username, "member", "M"))
+                .from(member)
+                .fetch();
+
+        /*
+        select
+            replace(member0_.username,
+            ?,
+            ?) as col_0_0_
+        from
+            member member0_
+         */
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+        /*
+        s = M1
+        s = M2
+        s = M3
+        s = M4
+         */
+    }
+
+    @Test
+    public void sqlFunction2() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .where(member.username.eq(
+                        Expressions.stringTemplate("function('lower', {0})", member.username)))
+                .fetch();
+
+        /*
+        select
+            member0_.username as col_0_0_
+        from
+            member member0_
+        where
+            member0_.username=lower(member0_.username)
+         */
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+        /*
+        s = member1
+        s = member2
+        s = member3
+        s = member4
+        */
+
+        List<String> result2 = queryFactory
+                .select(member.username)
+                .from(member)
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        /*
+        select
+            member0_.username as col_0_0_
+        from
+            member member0_
+        where
+            member0_.username=lower(member0_.username)
+         */
+        for (String s : result2) {
+            System.out.println("s = " + s);
+        }
+        /*
+        s = member1
+        s = member2
+        s = member3
+        s = member4
          */
     }
 }
