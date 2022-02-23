@@ -132,4 +132,60 @@ public class QuerydslAdvancedTest2 {
     private BooleanExpression allEq(String usernameP, Integer ageP) {
         return usernameEq(usernameP).and(ageEq(ageP));
     }
+
+    @Test
+    public void bulkUpdate() {
+
+        // member1 = 10 --> 비회원
+        // member2 = 20 --> 비회원
+        // member3 = 30 --> 유지
+        // member4 = 40 --> 유지
+
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        /*
+        update member set username='비회원' where age<28;
+        */
+
+        // DB랑 영속성 콘텍스트의 같이 다르다.(bulk연산 단점)
+
+        em.flush();
+        em.clear();
+        // DB랑 영속성 콘텍스트의 값이 같게 설정
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member : result) {
+            System.out.println("member = " + member);
+        }
+    }
+
+    @Test
+    public void bulkAdd() {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add((1)))
+                .execute();
+
+        /*
+        update member set age=age+1
+         */
+    }
+
+    @Test
+    public void bulkDel() {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+        /*
+        delete from member where age>18;
+         */
+    }
 }
