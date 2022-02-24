@@ -28,3 +28,5 @@
     5. 동적쿼리 - Where 다중 파라미터
     6. UPDATE, DELETE 벌크(BULK) 처리
     7. SQL function 호출
+  + Ch04. 순수 JPA 리포지토리와 Querydsl
+    1. 순수 JPA 리포지토리와 Querydsl
