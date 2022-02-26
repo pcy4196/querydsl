@@ -30,3 +30,4 @@
     7. SQL function 호출
   + Ch04. 순수 JPA 리포지토리와 Querydsl
     1. 순수 JPA 리포지토리와 Querydsl
+    2. 동적 쿼리와 성능 최적화 - Builder
