@@ -36,3 +36,4 @@
   + Ch05. 스프링 데이터 JPA와 Querydsl
     1. 스프링 데이터 JPA 리포지토리로 변경
     2. 사용자정의 리포지토리(MemberRepositoryImpl)
+    3. 스프링 데이터 페이징 활용 1 - Querydsl 페이징
