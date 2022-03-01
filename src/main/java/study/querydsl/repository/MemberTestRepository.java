@@ -11,9 +11,8 @@ import study.querydsl.repository.support.Querydsl4RepositorySupport;
 
 import java.util.List;
 
-
-import static org.springframework.util.StringUtils.isEmpty;
-import static study.querydsl.entity.QMember.*;
+import static org.springframework.util.ObjectUtils.isEmpty;
+import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.team;
 
 public class MemberTestRepository extends Querydsl4RepositorySupport {
