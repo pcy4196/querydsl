@@ -38,3 +38,4 @@
     2. 사용자정의 리포지토리(MemberRepositoryImpl)
     3. 스프링 데이터 페이징 활용 1 - Querydsl 페이징
     4. 스프링 데이터 페이징 활용 2 - CountQuery 최적화
+    5. 스프링 데이터 페이징 활용 3 - MemberController API 구현
