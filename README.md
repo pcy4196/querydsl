@@ -39,3 +39,6 @@
     3. 스프링 데이터 페이징 활용 1 - Querydsl 페이징
     4. 스프링 데이터 페이징 활용 2 - CountQuery 최적화
     5. 스프링 데이터 페이징 활용 3 - MemberController API 구현
+  + Ch06. 스프링 데이터 JPA가 제공하는 Querydsl 기능
+    1. 인터페이스 지원 - QuerydslPredicateExecutor
+    2. Querydsl 지원 클래스 직접 만들기 - Querydsl4RepositorySupport
